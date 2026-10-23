@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
-import { api } from '../api.js';
+import { api, errMsg } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import Icon from '../components/Icon.jsx';
-import { fmt, StatusBadge, useLiveReload } from '../components/ui.jsx';
+import { fmt, LoadError, StatusBadge, useLiveReload } from '../components/ui.jsx';
 
 const STATUS_COLORS = {
   Placed: '#3b82f6',
@@ -38,18 +38,24 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [agents, setAgents] = useState([]);
 
+  const [loadError, setLoadError] = useState('');
   const load = useCallback(async () => {
-    const [rep, ord, ag] = await Promise.all([api.get('/admin/reports'), api.get('/orders'), api.get('/admin/users?role=agent')]);
-    setR(rep.data);
-    setOrders(ord.data.orders);
-    setAgents(ag.data.users);
+    try {
+      const [rep, ord, ag] = await Promise.all([api.get('/admin/reports'), api.get('/orders'), api.get('/admin/users?role=agent')]);
+      setR(rep.data);
+      setOrders(ord.data.orders);
+      setAgents(ag.data.users);
+      setLoadError('');
+    } catch (e) {
+      setLoadError(errMsg(e));
+    }
   }, []);
   useEffect(() => {
     load();
   }, [load]);
   useLiveReload(load);
 
-  if (!r) return <p className="muted">Loading…</p>;
+  if (!r) return loadError ? <LoadError message={loadError} onRetry={load} /> : <p className="muted">Loading…</p>;
   const statuses = Object.keys(STATUS_COLORS);
   const pie = statuses.map((s) => ({ name: s, value: r.byStatus[s] || 0 })).filter((d) => d.value > 0);
   const unassigned = orders.filter((o) => o.status === 'Placed' && !o.agent).length;

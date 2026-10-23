@@ -4,3 +4,7 @@ dist
 server/data
 *.log
 server/backups
+
+playwright-report
+test-results
+blob-report

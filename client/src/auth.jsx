@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { api, API_URL } from './api.js';
+import { setMonitoringUser } from './monitoring.js';
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -18,6 +19,10 @@ export function AuthProvider({ children }) {
       .catch(() => localStorage.removeItem('token'))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    setMonitoringUser(user);
+  }, [user]);
 
   // One authenticated WebSocket connection for the whole session.
   useEffect(() => {

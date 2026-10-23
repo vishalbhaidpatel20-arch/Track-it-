@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, errMsg } from '../api.js';
-import { Alert, OrdersTable, useLiveReload } from '../components/ui.jsx';
+import { Alert, LoadError, OrdersTable, useLiveReload } from '../components/ui.jsx';
 
 const FILTERS = ['All', 'Placed', 'Picked-up', 'In-Transit', 'Delivered', 'Cancelled'];
 
@@ -10,10 +10,24 @@ export default function AdminOrders() {
   const [filter, setFilter] = useState('All');
   const [error, setError] = useState('');
 
-  const load = useCallback(() => api.get('/orders').then((r) => setOrders(r.data.orders)), []);
+  const [loadError, setLoadError] = useState('');
+  const load = useCallback(
+    () =>
+      api
+        .get('/orders')
+        .then((r) => {
+          setOrders(r.data.orders);
+          setLoadError('');
+        })
+        .catch((e) => setLoadError(errMsg(e))),
+    []
+  );
   useEffect(() => {
     load();
-    api.get('/admin/users?role=agent').then((r) => setAgents(r.data.users.filter((a) => a.active)));
+    api
+      .get('/admin/users?role=agent')
+      .then((r) => setAgents(r.data.users.filter((a) => a.active)))
+      .catch(() => {}); // the order list shows its own error
   }, [load]);
   useLiveReload(load);
 
@@ -28,7 +42,7 @@ export default function AdminOrders() {
     }
   };
 
-  if (!orders) return <p className="muted">Loading…</p>;
+  if (!orders) return loadError ? <LoadError message={loadError} onRetry={load} /> : <p className="muted">Loading…</p>;
   const shown = filter === 'All' ? orders : orders.filter((o) => o.status === filter);
 
   return (

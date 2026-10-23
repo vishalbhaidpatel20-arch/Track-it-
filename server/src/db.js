@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url';
 import mongoose from 'mongoose';
 import { config } from './config.js';
 
-export const DATA_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../data/db');
+export const DATA_DIR = process.env.DB_PATH
+  ? path.resolve(process.env.DB_PATH)
+  : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../data/db');
 export const DB_PORT = Number(process.env.DB_PORT) || 27017;
 export const LOCAL_URI = `mongodb://127.0.0.1:${DB_PORT}/delivery`;
 

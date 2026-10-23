@@ -4,7 +4,7 @@ import { api, errMsg } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import Icon from '../components/Icon.jsx';
 import MapView from '../components/MapView.jsx';
-import { Alert, CallButton, mapsUrl, StatusBadge, useLiveReload } from '../components/ui.jsx';
+import { Alert, CallButton, LoadError, mapsUrl, StatusBadge, useLiveReload } from '../components/ui.jsx';
 
 const NEXT = { Placed: 'Picked-up', 'Picked-up': 'In-Transit', 'In-Transit': 'Delivered' };
 const OPEN = ['Placed', 'Picked-up', 'In-Transit'];
@@ -19,12 +19,17 @@ export default function AgentDeliveries() {
   const posRef = useRef(null);
   const ordersRef = useRef([]);
 
+  const [loadError, setLoadError] = useState('');
   const load = useCallback(
     () =>
-      api.get('/orders').then((r) => {
-        setOrders(r.data.orders);
-        ordersRef.current = r.data.orders;
-      }),
+      api
+        .get('/orders')
+        .then((r) => {
+          setOrders(r.data.orders);
+          ordersRef.current = r.data.orders;
+          setLoadError('');
+        })
+        .catch((e) => setLoadError(errMsg(e))),
     []
   );
   useEffect(() => {
@@ -90,7 +95,7 @@ export default function AgentDeliveries() {
     }
   };
 
-  if (!orders) return <p className="muted">Loading…</p>;
+  if (!orders) return loadError ? <LoadError message={loadError} onRetry={load} /> : <p className="muted">Loading…</p>;
   const open = orders.filter((o) => OPEN.includes(o.status));
   const done = orders.filter((o) => !OPEN.includes(o.status));
   const sharing = mode !== 'off';

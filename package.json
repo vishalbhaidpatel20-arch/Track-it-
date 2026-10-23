@@ -2,9 +2,12 @@
   "name": "delivery-tracking-system",
   "private": true,
   "scripts": {
-    "install:all": "npm install --prefix server && npm install --prefix client",
+    "install:all": "npm install --prefix server && npm install --prefix client && npm install --prefix e2e",
     "dev:server": "npm run dev --prefix server",
     "dev:client": "npm run dev --prefix client",
-    "build": "npm run build --prefix client"
+    "build": "npm run build --prefix client",
+    "test": "npm test --prefix server && npm test --prefix client",
+    "test:e2e": "npm test --prefix e2e",
+    "test:all": "npm test && npm run test:e2e"
   }
 }

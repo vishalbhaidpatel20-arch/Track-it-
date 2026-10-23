@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import { config } from './config.js';
+import { captureError } from './monitoring.js';
 import { userFromToken } from './middleware/auth.js';
 import { Location, Order, User, ACTIVE_STATUSES } from './models/index.js';
 
@@ -36,7 +37,8 @@ export function initSocket(httpServer) {
         if (!ok) return ack?.({ ok: false });
         socket.join(`order:${orderId}`);
         ack?.({ ok: true });
-      } catch {
+      } catch (err) {
+        if (err.name !== 'CastError') captureError(err, { source: 'socket:order:join' });
         ack?.({ ok: false });
       }
     });
@@ -45,22 +47,26 @@ export function initSocket(httpServer) {
 
     // Agents stream their GPS position; it is relayed to every active order they carry.
     socket.on('location:update', async ({ lat, lng } = {}) => {
-      if (user.role !== 'agent') return;
-      if (typeof lat !== 'number' || typeof lng !== 'number' || Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
-      const at = new Date();
-      await User.updateOne({ _id: user._id }, { currentLocation: { lat, lng, updatedAt: at } });
-      const orders = await Order.find({ agent: user._id, status: { $in: ACTIVE_STATUSES } }).select('_id');
-      for (const o of orders) {
-        const payload = { orderId: String(o._id), agentId: String(user._id), lat, lng, at };
-        io.to(`order:${o._id}`).to('admin').emit('location:update', payload);
-        const key = String(o._id);
-        if (!lastSaved.has(key) || at - lastSaved.get(key) >= PERSIST_EVERY_MS) {
-          lastSaved.set(key, at.getTime());
-          await Location.create({ order: o._id, agent: user._id, lat, lng });
+      try {
+        if (user.role !== 'agent') return;
+        if (typeof lat !== 'number' || typeof lng !== 'number' || Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
+        const at = new Date();
+        await User.updateOne({ _id: user._id }, { currentLocation: { lat, lng, updatedAt: at } });
+        const orders = await Order.find({ agent: user._id, status: { $in: ACTIVE_STATUSES } }).select('_id');
+        for (const o of orders) {
+          const payload = { orderId: String(o._id), agentId: String(user._id), lat, lng, at };
+          io.to(`order:${o._id}`).to('admin').emit('location:update', payload);
+          const key = String(o._id);
+          if (!lastSaved.has(key) || at - lastSaved.get(key) >= PERSIST_EVERY_MS) {
+            lastSaved.set(key, at.getTime());
+            await Location.create({ order: o._id, agent: user._id, lat, lng });
+          }
         }
+        // Admin map also tracks agents with an assigned (not yet picked-up) order.
+        io.to('admin').emit('agent:location', { agentId: String(user._id), lat, lng, at });
+      } catch (err) {
+        captureError(err, { source: 'socket:location:update', userId: String(user._id) });
       }
-      // Admin map also tracks agents with an assigned (not yet picked-up) order.
-      io.to('admin').emit('agent:location', { agentId: String(user._id), lat, lng, at });
     });
   });
 

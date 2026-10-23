@@ -1,19 +1,31 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../api.js';
+import { api, errMsg } from '../api.js';
+import { LoadError } from '../components/ui.jsx';
 import { OrdersTable, useLiveReload } from '../components/ui.jsx';
 
 export default function UserOrders() {
   const [orders, setOrders] = useState(null);
   const [tab, setTab] = useState('active');
 
-  const load = useCallback(() => api.get('/orders').then((r) => setOrders(r.data.orders)), []);
+  const [loadError, setLoadError] = useState('');
+  const load = useCallback(
+    () =>
+      api
+        .get('/orders')
+        .then((r) => {
+          setOrders(r.data.orders);
+          setLoadError('');
+        })
+        .catch((e) => setLoadError(errMsg(e))),
+    []
+  );
   useEffect(() => {
     load();
   }, [load]);
   useLiveReload(load);
 
-  if (!orders) return <p className="muted">Loading…</p>;
+  if (!orders) return loadError ? <LoadError message={loadError} onRetry={load} /> : <p className="muted">Loading…</p>;
   const isActive = (o) => !['Delivered', 'Cancelled'].includes(o.status);
   const shown = orders.filter((o) => (tab === 'active' ? isActive(o) : !isActive(o)));
 

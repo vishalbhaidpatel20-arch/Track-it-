@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { captureError } from './monitoring.js';
 
 export const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -10,4 +11,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export const errMsg = (e) => e?.response?.data?.message || e?.message || 'Something went wrong';
+// Report server failures (5xx) and unreachable servers; 4xx are normal user errors.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    if (!error.response || status >= 500) {
+      captureError(error, { url: error.config?.url, method: error.config?.method, status });
+    }
+    return Promise.reject(error);
+  }
+);
+
+/** Turns any API error into a message a user can act on. */
+export const errMsg = (e) => {
+  if (e?.response?.data?.message) return e.response.data.message;
+  if (e?.request && !e.response) return 'Cannot reach the server. Check your connection and try again.';
+  return e?.message || 'Something went wrong';
+};

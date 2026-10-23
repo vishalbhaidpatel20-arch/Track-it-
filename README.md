@@ -53,3 +53,28 @@ client/src  pages/ components/ auth.jsx api.js
 - Maps use Leaflet + OpenStreetMap (no API key needed) instead of Google Maps; swapping providers only touches `client/src/components/MapView.jsx`.
 - Delivery due time = 30 min handling + distance at 25 km/h; used for the on-time rate.
 - Out of scope in Phase 1: native apps, payments, AI route optimization.
+
+## Testing
+
+| Layer | Tool | Command | What it covers |
+|---|---|---|---|
+| Server unit + API + WebSocket | `node:test`, supertest, socket.io-client | `npm test --prefix server` | geo/due-time maths, validation, error handler, auth, roles, full order lifecycle, notifications, reports, live location tracking |
+| Client unit/component | Vitest + Testing Library | `npm test --prefix client` | helpers, order list, error boundary, API error handling, login, navigation per role, route protection |
+| End-to-end (real Chrome) | Playwright | `npm run test:e2e` | full customer -> admin -> agent delivery with live updates, access control, admin screens, error recovery, phone layout |
+
+```bash
+npm test            # server + client tests (fast, no browser)
+npm run test:e2e    # browser tests (uses your installed Google Chrome)
+npm run test:all    # everything
+```
+
+Tests never touch your real data: server tests use a throwaway in-memory MongoDB; the e2e run starts its own API (port 5055), database (port 27099, folder `server/data/e2e-db`, recreated each run) and web app (port 5174), so it can run while your dev servers are up.
+
+## Error monitoring (Sentry)
+
+Optional and off by default. Create a project at [sentry.io](https://sentry.io), then set the DSNs:
+
+- API: `SENTRY_DSN` (and optionally `SENTRY_ENVIRONMENT`) in `server/.env`
+- Web app: `VITE_SENTRY_DSN` in `client/.env` (set it in your hosting provider's environment variables for production builds)
+
+What is reported: unexpected server errors (5xx) with route and user id, crashes in socket handlers, unhandled rejections/exceptions, browser render crashes, failed/unreachable API calls. Normal 4xx errors (bad input, wrong password) are not reported, and no emails or names are sent. The UI never shows stack traces: users see a friendly message, a Retry button on pages that fail to load, or a recovery screen if the page crashes.

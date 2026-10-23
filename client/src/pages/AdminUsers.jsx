@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, errMsg } from '../api.js';
 import { useAuth } from '../auth.jsx';
-import { Alert } from '../components/ui.jsx';
+import { Alert, LoadError } from '../components/ui.jsx';
 
 const blank = { name: '', email: '', phone: '', password: '', role: 'agent' };
 
@@ -12,7 +12,18 @@ export default function AdminUsers() {
   const [error, setError] = useState('');
   const [open, setOpen] = useState(false);
 
-  const load = useCallback(() => api.get('/admin/users').then((r) => setUsers(r.data.users)), []);
+  const [loadError, setLoadError] = useState('');
+  const load = useCallback(
+    () =>
+      api
+        .get('/admin/users')
+        .then((r) => {
+          setUsers(r.data.users);
+          setLoadError('');
+        })
+        .catch((e) => setLoadError(errMsg(e))),
+    []
+  );
   useEffect(() => {
     load();
   }, [load]);
@@ -63,7 +74,7 @@ export default function AdminUsers() {
       </form>
       <Alert>{error}</Alert>
       {!users ? (
-        <p className="muted">Loading…</p>
+        loadError ? <LoadError message={loadError} onRetry={load} /> : <p className="muted">Loading…</p>
       ) : (
         <div className="card table-wrap">
           <table>

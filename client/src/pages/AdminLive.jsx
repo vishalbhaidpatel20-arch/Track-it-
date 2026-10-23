@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../api.js';
+import { api, errMsg } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import Icon from '../components/Icon.jsx';
 import MapView, { TILES } from '../components/MapView.jsx';
-import { fmtEta, StatusBadge, useLiveReload } from '../components/ui.jsx';
+import { fmtEta, LoadError, StatusBadge, useLiveReload } from '../components/ui.jsx';
 
 const FILTERS = ['All', 'Placed', 'Picked-up', 'In-Transit'];
 const MAX_TRAIL = 40;
@@ -50,9 +50,11 @@ export default function AdminLive() {
   const [fitKey, setFitKey] = useState(0);
   const [now, setNow] = useState(Date.now());
 
+  const [loadError, setLoadError] = useState('');
   const load = useCallback(
     () =>
       api.get('/admin/live').then((r) => {
+        setLoadError('');
         setOrders(r.data.orders);
         setPos((prev) => {
           const next = { ...prev };
@@ -70,7 +72,7 @@ export default function AdminLive() {
           }
           return next;
         });
-      }),
+      }).catch((e) => setLoadError(errMsg(e))),
     []
   );
   useEffect(() => {
@@ -112,7 +114,7 @@ export default function AdminLive() {
     );
   }, [orders, filter, query]);
 
-  if (!orders) return <p className="muted">Loading…</p>;
+  if (!orders) return loadError ? <LoadError message={loadError} onRetry={load} /> : <p className="muted">Loading…</p>;
 
   const count = (s) => orders.filter((o) => o.status === s).length;
   const onlineAgents = new Set(orders.filter((o) => seen[o.agent._id] && now - seen[o.agent._id] < 2 * 60 * 1000).map((o) => o.agent._id)).size;

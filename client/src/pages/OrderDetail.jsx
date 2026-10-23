@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { api, errMsg } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import MapView from '../components/MapView.jsx';
-import { Alert, CallButton, fmt, fmtEta, mapsUrl, StatusBadge, STATUS_STEPS } from '../components/ui.jsx';
+import { Alert, CallButton, LoadError, fmt, fmtEta, mapsUrl, StatusBadge, STATUS_STEPS } from '../components/ui.jsx';
 import Icon from '../components/Icon.jsx';
 
 const NEXT = { Placed: 'Picked-up', 'Picked-up': 'In-Transit', 'In-Transit': 'Delivered' };
@@ -118,7 +118,7 @@ export default function OrderDetail() {
     }
   };
 
-  if (!data) return error ? <Alert>{error}</Alert> : <p className="muted">Loading…</p>;
+  if (!data) return error ? <LoadError message={error} onRetry={() => (setError(''), load())} /> : <p className="muted">Loading…</p>;
   const { order, logs } = data;
   const live = ['Picked-up', 'In-Transit'].includes(order.status);
   const showAgent = agentPos && (live || (order.status === 'Placed' && user.role !== 'user'));

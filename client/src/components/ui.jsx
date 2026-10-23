@@ -21,6 +21,17 @@ export const mapsUrl = (p) => `https://www.google.com/maps/dir/?api=1&destinatio
 
 export const Alert = ({ children }) => (children ? <div className="alert">{children}</div> : null);
 
+/** Shown instead of an endless "Loading…" when a page's data could not be fetched. */
+export const LoadError = ({ message, onRetry }) => (
+  <div className="card pad load-error" role="alert">
+    <strong>We couldn't load this page</strong>
+    <p className="muted">{message}</p>
+    <button className="btn primary" onClick={onRetry}>
+      Try again
+    </button>
+  </div>
+);
+
 /** One-tap call button; renders nothing without a phone number. */
 export const CallButton = ({ phone, label = 'Call' }) =>
   phone ? (

@@ -829,3 +829,12 @@ th { background: transparent; border-bottom: 1px solid var(--border); }
   .table-wrap td:last-child { display: block; }
   .table-wrap td:last-child::before { display: none; }
 }
+
+/* Crash screen */
+.crash-card { max-width: 460px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 0; }
+.crash-card h2 { margin: 4px 0 0; }
+.crash-card .row { justify-content: center; }
+
+/* Load failure panel */
+.load-error { max-width: 480px; margin: 40px auto; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.load-error p { margin: 0 0 8px; }
