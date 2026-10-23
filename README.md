@@ -78,3 +78,26 @@ Optional and off by default. Create a project at [sentry.io](https://sentry.io),
 - Web app: `VITE_SENTRY_DSN` in `client/.env` (set it in your hosting provider's environment variables for production builds)
 
 What is reported: unexpected server errors (5xx) with route and user id, crashes in socket handlers, unhandled rejections/exceptions, browser render crashes, failed/unreachable API calls. Normal 4xx errors (bad input, wrong password) are not reported, and no emails or names are sent. The UI never shows stack traces: users see a friendly message, a Retry button on pages that fail to load, or a recovery screen if the page crashes.
+
+## Deploying
+
+Vercel hosts the web app only. The API needs a host that keeps long-lived WebSocket connections (live tracking), so it runs on Render, with MongoDB Atlas as the database.
+
+**1. Database (MongoDB Atlas, free)** - create a cluster, a database user, allow network access (0.0.0.0/0 for Render's free tier), and copy the connection string.
+
+**2. API (Render)** - New > Blueprint > pick this repo (`render.yaml` is picked up automatically). Set:
+
+| Variable | Value |
+|---|---|
+| `MONGODB_URI` | the Atlas connection string |
+| `CLIENT_ORIGIN` | your Vercel URL, e.g. `https://trackit.vercel.app` (comma-separate extra origins) |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | credentials of the first admin (created once, when the database is empty) |
+| `SENTRY_DSN` | optional |
+
+`JWT_SECRET` is generated for you. Production never creates the demo accounts.
+
+**3. Web app (Vercel)** - Add New > Project > import this repo and set **Root Directory** to `client` (framework: Vite, detected from `client/vercel.json`). Add the environment variable `VITE_API_URL` = your Render URL (e.g. `https://trackit-api.onrender.com`, no trailing slash), optionally `VITE_SENTRY_DSN`, then deploy.
+
+**4.** If the Vercel URL differs from what you put in `CLIENT_ORIGIN`, update it on Render. Sign in with the admin account, then create agents under **Users**.
+
+Render's free plan sleeps after inactivity, so the first request can take ~30 s to wake the API.

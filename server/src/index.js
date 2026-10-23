@@ -4,7 +4,7 @@ import { config } from './config.js';
 import { connectDb } from './db.js';
 import { createApp } from './app.js';
 import { initSocket } from './socket.js';
-import { seedIfEmpty } from './seed.js';
+import { bootstrapAdmin, seedIfEmpty } from './seed.js';
 
 if (initMonitoring()) console.log('Sentry error monitoring enabled');
 
@@ -22,7 +22,8 @@ process.on('uncaughtException', async (err) => {
 
 try {
   await connectDb();
-  await seedIfEmpty();
+  if (config.nodeEnv === 'production') await bootstrapAdmin();
+  else await seedIfEmpty();
 } catch (err) {
   console.error('Startup failed:', err);
   captureError(err, { source: 'startup' });

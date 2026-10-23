@@ -1,0 +1,27 @@
+# Render Blueprint for the API + WebSocket server (Vercel hosts only the web app).
+# Dashboard: New + > Blueprint > pick this repo. Fill in the values marked sync: false.
+services:
+  - type: web
+    name: trackit-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: node src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false          # MongoDB Atlas connection string
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGIN
+        sync: false          # your Vercel URL, e.g. https://trackit.vercel.app
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+        # optional

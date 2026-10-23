@@ -13,6 +13,17 @@ const places = {
   karol: { address: 'Karol Bagh, New Delhi', lat: 28.6519, lng: 77.1909 },
 };
 
+/**
+ * Production bootstrap: creates the first admin from ADMIN_EMAIL / ADMIN_PASSWORD when the database has no users.
+ * (Demo accounts with a public password are never created in production.)
+ */
+export async function bootstrapAdmin() {
+  const { ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME } = process.env;
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD || (await User.exists({}))) return;
+  await User.create({ name: ADMIN_NAME || 'Admin', email: ADMIN_EMAIL, role: 'admin', password: await bcrypt.hash(ADMIN_PASSWORD, 10) });
+  console.log(`Created first admin account: ${ADMIN_EMAIL}`);
+}
+
 /** Inserts demo accounts and a few sample orders when the database is empty. */
 export async function seedIfEmpty() {
   if (await User.exists({})) return;
