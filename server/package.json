@@ -7,7 +7,12 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "seed": "node src/seed.js",
-    "test": "node --test"
+    "test": "node --test",
+    "db:start": "node scripts/db-start.js",
+    "db:info": "node scripts/db-info.js",
+    "db:backup": "node scripts/db-backup.js",
+    "db:restore": "node scripts/db-restore.js",
+    "db:reset": "node scripts/db-reset.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

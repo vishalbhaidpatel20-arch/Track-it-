@@ -12,7 +12,20 @@ npm run dev:server       # API + WebSocket on :5000
 npm run dev:client       # UI on http://localhost:5173
 ```
 
-With no `MONGODB_URI`, the server starts an embedded MongoDB (data in `server/data`; the first start downloads the MongoDB binary, ~600 MB). To use your own database, copy `server/.env.example` to `server/.env` and set `MONGODB_URI` (e.g. MongoDB Atlas).
+## Database
+
+By default the app uses a local MongoDB with **data stored in `server/data/db`** and a **fixed port (27017)**:
+`mongodb://127.0.0.1:27017/delivery` (works with MongoDB Compass). The first start downloads the MongoDB binary (~600 MB, one time).
+
+```bash
+npm run db:start   --prefix server   # (optional) run the database on its own, independent of the API
+npm run db:info    --prefix server   # counts + users + recent orders
+npm run db:backup  --prefix server   # export everything to server/backups/<timestamp>
+npm run db:restore --prefix server -- backups/<folder> --yes   # replace data from a backup
+npm run db:reset   --prefix server -- --yes                    # wipe and re-seed demo data
+```
+
+If nothing is listening on 27017, the API starts the database itself. To use your own database (e.g. MongoDB Atlas) copy `server/.env.example` to `server/.env` and set `MONGODB_URI`; set `DB_PORT` to change the local port.
 
 Demo accounts are seeded on first run (password `password123`):
 `user@demo.com` (customer) · `agent1@demo.com`, `agent2@demo.com` (agents) · `admin@demo.com` (admin).
