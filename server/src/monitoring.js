@@ -6,7 +6,7 @@ let reporter = null; // test hook: receives every captured error instead of Sent
 
 /** Starts Sentry when SENTRY_DSN is set; otherwise monitoring is a no-op. */
 export function initMonitoring() {
-  const dsn = process.env.SENTRY_DSN;
+  const dsn = (process.env.SENTRY_DSN || '').trim();
   if (!dsn) return false;
   Sentry.init({
     dsn,

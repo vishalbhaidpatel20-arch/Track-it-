@@ -9,7 +9,7 @@ if (nodeEnv === 'production' && !process.env.JWT_SECRET) {
 
 export const config = {
   port: Number(process.env.PORT) || 5000,
-  mongoUri: process.env.MONGODB_URI || '',
+  mongoUri: (process.env.MONGODB_URI || '').trim().replace(/^["']|["']$/g, ''),
   jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-me',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   // One or more allowed web app origins, comma separated (e.g. production + a preview URL).
