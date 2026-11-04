@@ -13,6 +13,8 @@ const userSchema = new Schema(
     role: { type: String, enum: ['user', 'agent', 'admin'], default: 'user' },
     phone: { type: String, trim: true },
     active: { type: Boolean, default: true },
+    // Agents sign up as 'pending' and must be approved by an admin before they can log in.
+    approval: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'approved', index: true },
     // Agent-only fields
     available: { type: Boolean, default: true },
     currentLocation: {

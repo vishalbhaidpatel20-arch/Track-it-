@@ -19,6 +19,7 @@ const createUserSchema = z.object({
 const updateUserSchema = z.object({
   role: z.enum(['user', 'agent', 'admin']).optional(),
   active: z.boolean().optional(),
+  approval: z.enum(['pending', 'approved', 'rejected']).optional(),
   name: z.string().min(2).max(80).optional(),
   phone: z.string().max(20).optional(),
 });
@@ -26,7 +27,9 @@ const updateUserSchema = z.object({
 router.get(
   '/users',
   wrap(async (req, res) => {
-    const filter = req.query.role ? { role: req.query.role } : {};
+    const filter = {};
+    if (req.query.role) filter.role = req.query.role;
+    if (req.query.approval) filter.approval = req.query.approval;
     const users = await User.find(filter).sort('-createdAt');
     res.json({ users });
   })

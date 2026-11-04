@@ -8,7 +8,7 @@ export const signToken = (user) =>
 export async function userFromToken(token) {
   const payload = jwt.verify(token, config.jwtSecret);
   const user = await User.findById(payload.id);
-  if (!user || !user.active) throw new Error('Invalid user');
+  if (!user || !user.active || (user.approval && user.approval !== 'approved')) throw new Error('Invalid user');
   return user;
 }
 

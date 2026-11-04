@@ -44,11 +44,9 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('Login screen', () => {
-  test('demo buttons fill in the credentials', async () => {
+  test('has no demo account shortcuts', () => {
     mount(<Login />);
-    await userEvent.click(screen.getByText('Admin'));
-    expect(screen.getByLabelText('Email').value).toBe('admin@demo.com');
-    expect(screen.getByLabelText('Password').value).toBe('password123');
+    expect(screen.queryByText(/demo accounts/i)).toBeNull();
   });
 
   test('shows the server message when sign-in fails', async () => {

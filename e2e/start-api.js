@@ -16,6 +16,7 @@ Object.assign(process.env, {
   JWT_SECRET: 'e2e-secret',
   CLIENT_ORIGIN: 'http://localhost:5174',
   SENTRY_DSN: '',
+  SEED_DEMO: 'true',
 });
 
 await import(pathToFileURL(path.join(root, 'server', 'src', 'index.js')).href);

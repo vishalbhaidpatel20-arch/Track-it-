@@ -4,7 +4,7 @@ import { loginAs, registerCustomer, stubExternal } from './helpers.js';
 test.beforeEach(async ({ context }) => stubExternal(context));
 
 test.describe('authentication', () => {
-  test('login page shows demo shortcuts and rejects bad credentials', async ({ page }) => {
+  test('login page rejects bad credentials', async ({ page }) => {
     await page.goto('/login');
     await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
     await page.getByLabel('Email').fill('user@demo.com');

@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 
+// Test-only accounts, seeded when the e2e API starts with SEED_DEMO=true.
 export const DEMO = {
   admin: { email: 'admin@demo.com', button: 'Admin' },
   agent: { email: 'agent1@demo.com', button: 'Agent' },
@@ -23,7 +24,8 @@ export async function newSession(browser) {
 
 export async function loginAs(page, who) {
   await page.goto('/login');
-  await page.getByRole('button', { name: DEMO[who].button, exact: true }).click();
+  await page.getByLabel('Email').fill(DEMO[who].email);
+  await page.getByLabel('Password').fill('password123');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).not.toHaveURL(/\/login/);
 }

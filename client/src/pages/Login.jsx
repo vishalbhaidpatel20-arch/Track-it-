@@ -5,14 +5,7 @@ import { useAuth } from '../auth.jsx';
 import { Alert } from '../components/ui.jsx';
 import AuthShell from '../components/AuthShell.jsx';
 
-// Demo shortcuts exist only in development (or when VITE_SHOW_DEMO=true); production has no public demo accounts.
-const SHOW_DEMO = !import.meta.env.PROD || import.meta.env.VITE_SHOW_DEMO === 'true';
 const HOME = { user: '/orders', agent: '/deliveries', admin: '/admin' };
-const DEMOS = [
-  ['Customer', 'user@demo.com'],
-  ['Agent', 'agent1@demo.com'],
-  ['Admin', 'admin@demo.com'],
-];
 
 export default function Login() {
   const { user, login } = useAuth();
@@ -57,18 +50,6 @@ export default function Login() {
         <p className="muted small">
           New customer? <Link to="/register">Create an account</Link>
         </p>
-        {SHOW_DEMO && (
-          <div className="demo">
-            <span className="muted small">Demo accounts (password: password123)</span>
-            <div className="row">
-              {DEMOS.map(([label, email]) => (
-                <button type="button" key={email} className="btn ghost small" onClick={() => setForm({ email, password: 'password123' })}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </form>
     </AuthShell>
   );

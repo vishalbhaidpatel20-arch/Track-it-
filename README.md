@@ -27,8 +27,9 @@ npm run db:reset   --prefix server -- --yes                    # wipe and re-see
 
 If nothing is listening on 27017, the API starts the database itself. To use your own database (e.g. MongoDB Atlas) copy `server/.env.example` to `server/.env` and set `MONGODB_URI`; set `DB_PORT` to change the local port.
 
-Demo accounts are seeded on first run (password `password123`):
-`user@demo.com` (customer) · `agent1@demo.com`, `agent2@demo.com` (agents) · `admin@demo.com` (admin).
+There are no built-in demo accounts. Create the admin with `npm run admin:create --prefix server -- <email> <password> "<name>"`.
+Customers register themselves; agents register and wait for an admin to approve them under **Users**.
+(Set `SEED_DEMO=true` in development to load sample accounts; password `password123`.)
 
 ## Try the full flow
 1. Customer: **New Order** - search an address or click the map for pickup and drop, then place it.

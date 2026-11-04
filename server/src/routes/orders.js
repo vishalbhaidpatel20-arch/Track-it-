@@ -102,7 +102,7 @@ router.patch(
     const order = await populate(Order.findById(req.params.id));
     if (!order) return res.status(404).json({ message: 'Order not found' });
     if (order.status !== 'Placed') return res.status(400).json({ message: 'Only placed orders can be (re)assigned' });
-    const agent = await User.findOne({ _id: req.body.agentId, role: 'agent', active: true });
+    const agent = await User.findOne({ _id: req.body.agentId, role: 'agent', active: true, approval: 'approved' });
     if (!agent) return res.status(400).json({ message: 'Agent not found' });
 
     const previousAgent = order.agent?._id;

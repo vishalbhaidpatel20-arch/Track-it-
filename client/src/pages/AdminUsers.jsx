@@ -73,6 +73,26 @@ export default function AdminUsers() {
         <button className="btn primary">Add user</button>
       </form>
       <Alert>{error}</Alert>
+      {users?.some((u) => u.approval === 'pending') && (
+        <div className="card pad">
+          <h3>Pending agent requests</h3>
+          {users
+            .filter((u) => u.approval === 'pending')
+            .map((u) => (
+              <div className="row" key={u._id}>
+                <span>
+                  {u.name} · {u.email} {u.phone && `· ${u.phone}`}
+                </span>
+                <button className="btn primary small" onClick={() => update(u, { approval: 'approved' })}>
+                  Approve
+                </button>
+                <button className="btn ghost small" onClick={() => update(u, { approval: 'rejected' })}>
+                  Reject
+                </button>
+              </div>
+            ))}
+        </div>
+      )}
       {!users ? (
         loadError ? <LoadError message={loadError} onRetry={load} /> : <p className="muted">Loading…</p>
       ) : (
@@ -104,6 +124,8 @@ export default function AdminUsers() {
                   </td>
                   <td data-label="Status">
                     <span className={`pill ${u.active ? 'ok' : 'off'}`}>{u.active ? 'Active' : 'Disabled'}</span>
+                    {u.approval === 'pending' && <span className="pill off">Pending</span>}
+                    {u.approval === 'rejected' && <span className="pill off">Rejected</span>}
                     {u.role === 'agent' && <span className="pill">{u.available ? 'Free' : 'Busy'}</span>}
                   </td>
                   <td>

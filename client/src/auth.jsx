@@ -37,6 +37,7 @@ export function AuthProvider({ children }) {
 
   const authenticate = async (path, body) => {
     const { data } = await api.post(`/auth/${path}`, body);
+    if (data.pending) return data; // agent sign-up awaiting admin approval: no session yet
     localStorage.setItem('token', data.token);
     setUser(data.user);
     return data.user;

@@ -22,8 +22,8 @@ process.on('uncaughtException', async (err) => {
 
 try {
   await connectDb();
-  if (config.nodeEnv === 'production') await bootstrapAdmin();
-  else await seedIfEmpty();
+  await bootstrapAdmin(); // first admin from ADMIN_EMAIL / ADMIN_PASSWORD when the database is empty
+  if (process.env.SEED_DEMO === 'true' && config.nodeEnv !== 'production') await seedIfEmpty(); // opt-in demo data (used by e2e)
 } catch (err) {
   console.error('Startup failed:', err);
   captureError(err, { source: 'startup' });

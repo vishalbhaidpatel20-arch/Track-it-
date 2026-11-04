@@ -130,3 +130,26 @@ describe('role-based access', () => {
     assert.equal(res.status, 400);
   });
 });
+
+describe('agent approval', () => {
+  test('agent sign-up is pending, cannot log in until an admin approves', async () => {
+    const reg = await t.api().post('/api/auth/register').send({ name: 'Newbie Agent', email: 'pendingagent@test.com', password: 'secret12', role: 'agent' });
+    assert.equal(reg.status, 202, JSON.stringify(reg.body));
+    assert.equal(reg.body.pending, true);
+    assert.equal(reg.body.token, undefined);
+
+    const blocked = await t.api().post('/api/auth/login').send({ email: 'pendingagent@test.com', password: 'secret12' });
+    assert.equal(blocked.status, 403);
+
+    const { auth: adminAuth } = await t.makeUser({ name: 'Boss', email: 'boss2@test.com', role: 'admin' });
+    const list = await t.api().get('/api/admin/users?approval=pending').set(adminAuth);
+    const agent = list.body.users.find((u) => u.email === 'pendingagent@test.com');
+    assert.ok(agent);
+    const ok = await t.api().patch(`/api/admin/users/${agent._id}`).set(adminAuth).send({ approval: 'approved' });
+    assert.equal(ok.status, 200);
+
+    const login = await t.api().post('/api/auth/login').send({ email: 'pendingagent@test.com', password: 'secret12' });
+    assert.equal(login.status, 200);
+    assert.equal(login.body.user.role, 'agent');
+  });
+});
