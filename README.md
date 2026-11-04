@@ -4,6 +4,25 @@ Full-stack implementation of the plan in `projectscope.md`, `techstack.md` and `
 
 **Stack:** React (Vite) · Node.js/Express · MongoDB (Mongoose) · Socket.IO · Leaflet + OpenStreetMap maps · JWT auth with role-based access.
 
+## Live demo
+
+| | |
+|---|---|
+| **Web app** | https://client-ten-tau-77.vercel.app |
+| **API** | https://trackit-api-mh2p.onrender.com (`/api/health`) |
+
+**Explore as admin (demo account):**
+
+- Email: `demo-admin@trackit.com`
+- Password: `DemoAdmin@2026`
+
+**How the accounts work**
+- **Customer** - click *Create an account* on the sign-in page and register; you can place and track orders immediately.
+- **Delivery agent** - register and choose *Delivery agent*. The request is sent to an admin, and the agent can only sign in after the admin approves it under **Users -> Pending agent requests**.
+- **Admin** - signs in with the account above. Approves agents, manages users, and sees all orders, the live map and reports.
+
+> The demo runs on free hosting: the API sleeps when idle, so the first request after a pause can take up to a minute. This is a shared public demo; please don't enter real personal data.
+
 ## Run it
 
 ```bash
